@@ -1,6 +1,18 @@
 import random
 import matplotlib.pyplot as plt
 
+def resetCounter():
+    return 0, 0, 0
+
+def getThreeStar(pity4Count, pity5Count, counter):
+    return pity4Count + 1, pity5Count + 1, counter + 1
+
+def getFourStar(pity4Count, pity5Count, counter):
+    return 0, pity5Count + 1, counter + 1
+
+def getFiveStar(pity4Count, pity5Count, counter):
+    return 0, 0, counter + 1
+
 def runOne(X, Y):
     # output list (the result of each summon for 1 run)
     output = list()
@@ -9,9 +21,7 @@ def runOne(X, Y):
     # guaranteed for five star
     pity5Count = 0
     # count for each stars
-    threeCount = 0
-    fourCount = 0
-    fiveCount = 0
+    threeCount, fourCount, fiveCount = resetCounter()
 
     # 1-80 summons
     for _ in range(0, 80):
@@ -19,36 +29,27 @@ def runOne(X, Y):
         # for 5 star character
         if pity5Count >= 79:
             output.append('5')
-            pity4Count = 0 # maybe 1 5star + 9 4star
-            pity5Count = 0
-            fiveCount += 1
+            pity4Count, pity5Count, fiveCount = getFiveStar(pity4Count, pity5Count, fiveCount)
             continue
         # for 4 star character
         if pity4Count >= 9:
             output.append('4')
-            pity4Count = 0
-            pity5Count += 1
-            fourCount += 1
+            pity4Count, pity5Count, fourCount = getFourStar(pity4Count, pity5Count, fourCount)
             continue
         
-        summon = round(random.uniform(0, 1), 3) * 100
+        summon = round(random.uniform(0, 1), 6) * 100
         # summon (original rate)
         if pity5Count <= X:
             if 0 <= summon and summon <= 0.8:
                 output.append('5')
-                pity4Count = 0 # maybe 1 5star + 9 4star
-                pity5Count = 0
-                fiveCount += 1
-            elif 0.8 < summon and summon <= 6.7:
+                pity4Count, pity5Count, fiveCount = getFiveStar(pity4Count, pity5Count, fiveCount)
+            elif 0.8 < summon and summon <= 6.8:
                 output.append('4')
-                pity4Count = 0
-                pity5Count += 1
-                fourCount += 1
+                pity4Count, pity5Count, fourCount = getFourStar(pity4Count, pity5Count, fourCount)
             else:
                 output.append('3')
-                pity4Count += 1
-                pity5Count += 1
-                threeCount += 1
+                pity4Count, pity5Count, threeCount = getThreeStar(pity4Count, pity5Count, threeCount)
+
         # pity system (linear additional rate)
         else:
             additional_rate = (pity5Count - X) * Y
@@ -56,19 +57,13 @@ def runOne(X, Y):
             four_star_rate = 6.0
             if 0 <= summon and summon <= five_star_rate:
                 output.append('5')
-                pity4Count = 0 # maybe 1 5star + 9 4star
-                pity5Count = 0
-                fiveCount += 1
+                pity4Count, pity5Count, fiveCount = getFiveStar(pity4Count, pity5Count, fiveCount)
             elif five_star_rate < summon and summon <= four_star_rate + five_star_rate:
                 output.append('4')
-                pity4Count = 0
-                pity5Count += 1
-                fourCount += 1
+                pity4Count, pity5Count, fourCount = getFourStar(pity4Count, pity5Count, fourCount)
             else:
                 output.append('3')
-                pity4Count += 1
-                pity5Count += 1
-                threeCount += 1
+                pity4Count, pity5Count, threeCount = getThreeStar(pity4Count, pity5Count, threeCount)
     return output, threeCount, fourCount, fiveCount
 
 def SetXYPairLinear():
@@ -78,7 +73,7 @@ def SetXYPairLinear():
     initial = 0.8
     final = 100
     testFrom = 40
-    testTo = 72
+    testTo = 76
     for i in range(testFrom, testTo):
         gap = 80 - i
         X_values.append(i)
@@ -90,7 +85,7 @@ def SetXYPairMIHOYO():
     X_values = []
     Y_values = []
     testFrom = 40
-    testTo = 72
+    testTo = 76
     for i in range(testFrom, testTo):
         X_values.append(i)
         Y_values.append(8)
@@ -100,11 +95,12 @@ def GetAnswer(X_values, Y_values, testFrom, testTo, mode):
     assert mode == "linear" or mode == "miHoYo", "mode should be either 'linear' or 'miHoYo'"
 
     threeStarRatio = list()
-    threeStarOfficalRatio = [86.2] * (testTo - testFrom)
     fourStarRatio = list()
-    fourStarOfficalRatio = [12] * (testTo - testFrom)
     fiveStarRatio = list()
+    threeStarOfficalRatio = [86.2] * (testTo - testFrom)
+    fourStarOfficalRatio = [12] * (testTo - testFrom)
     fiveStarOfficalRatio = [1.8] * (testTo - testFrom)
+    
     for i in range(len(X_values)):
         X = X_values[i]
         Y = Y_values[i]
