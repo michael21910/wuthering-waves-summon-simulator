@@ -17,16 +17,16 @@ def runOne(X, Y):
     for _ in range(0, 80):
         # guaranteed system
         # for 5 star character
-        if pity5Count >= 80:
+        if pity5Count >= 79:
             output.append('5')
-            pity4Count = 1 # maybe 1 5star + 9 4star
-            pity5Count = 1
+            pity4Count = 0 # maybe 1 5star + 9 4star
+            pity5Count = 0
             fiveCount += 1
             continue
         # for 4 star character
-        if pity4Count >= 10:
+        if pity4Count >= 9:
             output.append('4')
-            pity4Count = 1
+            pity4Count = 0
             pity5Count += 1
             fourCount += 1
             continue
@@ -36,12 +36,12 @@ def runOne(X, Y):
         if pity5Count <= X:
             if 0 <= summon and summon <= 0.8:
                 output.append('5')
-                pity4Count = 1 # maybe 1 5star + 9 4star
-                pity5Count = 1
+                pity4Count = 0 # maybe 1 5star + 9 4star
+                pity5Count = 0
                 fiveCount += 1
             elif 0.8 < summon and summon <= 6.7:
                 output.append('4')
-                pity4Count = 1
+                pity4Count = 0
                 pity5Count += 1
                 fourCount += 1
             else:
@@ -56,12 +56,12 @@ def runOne(X, Y):
             four_star_rate = 6.0
             if 0 <= summon and summon <= five_star_rate:
                 output.append('5')
-                pity4Count = 1 # maybe 1 5star + 9 4star
-                pity5Count = 1
+                pity4Count = 0 # maybe 1 5star + 9 4star
+                pity5Count = 0
                 fiveCount += 1
             elif five_star_rate < summon and summon <= four_star_rate + five_star_rate:
                 output.append('4')
-                pity4Count = 1
+                pity4Count = 0
                 pity5Count += 1
                 fourCount += 1
             else:
@@ -145,7 +145,7 @@ def GetAnswer(X_values, Y_values, testFrom, testTo, mode):
         plt.xlabel("Summon")
         plt.ylabel("5-star summon ratio (%)")
         plt.title("5-star summon ratio per summon")
-        plt.savefig(f"5-star ratio per summon {mode} X={X_values[i]}.png")
+        plt.savefig(f"./{mode.lower()}/5-star ratio per summon {mode} X={X_values[i]}.png")
         plt.close()
 
     # three star ratio
@@ -155,7 +155,7 @@ def GetAnswer(X_values, Y_values, testFrom, testTo, mode):
     plt.xlabel("X")
     plt.ylabel("3-star summon ratio (%)")
     plt.title("3-star summon ratio")
-    plt.savefig(f"3-star summon ratio {mode}.png")
+    plt.savefig(f"./{mode.lower()}/3-star summon ratio {mode}.png")
     plt.close()
 
     # four star ratio
@@ -165,7 +165,7 @@ def GetAnswer(X_values, Y_values, testFrom, testTo, mode):
     plt.xlabel("X")
     plt.ylabel("4-star summon ratio (%)")
     plt.title("4-star summon ratio")
-    plt.savefig(f"4-star summon ratio {mode}.png")
+    plt.savefig(f"./{mode.lower()}/4-star summon ratio {mode}.png")
     plt.close()
 
     # five star ratio
@@ -175,10 +175,12 @@ def GetAnswer(X_values, Y_values, testFrom, testTo, mode):
     plt.xlabel("X")
     plt.ylabel("5-star summon ratio (%)")
     plt.title("5-star summon ratio")
-    plt.savefig(f"5-star summon ratio {mode}.png")
+    plt.savefig(f"./{mode.lower()}/5-star summon ratio {mode}.png")
     plt.close()
 
 if __name__ == "__main__":
     X_values, Y_values, testFrom, testTo = SetXYPairLinear()
-    # X_values, Y_values, testFrom, testTo = SetXYPairMIHOYO()
     GetAnswer(X_values, Y_values, testFrom, testTo, mode='linear')
+
+    X_values, Y_values, testFrom, testTo = SetXYPairMIHOYO()
+    GetAnswer(X_values, Y_values, testFrom, testTo, mode='miHoYo')
