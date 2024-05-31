@@ -151,9 +151,102 @@ def GetAnswer(X_values, Y_values, testFrom, testTo, mode):
     drawLineChart(X_values, fourStarRatio, fourStarOfficalRatio, mode, 4)
     drawLineChart(X_values, fiveStarRatio, fiveStarOfficalRatio, mode, 5)
 
-if __name__ == "__main__":
-    X_values, Y_values, testFrom, testTo = SetXYPairLinear(40, 76)
-    GetAnswer(X_values, Y_values, testFrom, testTo, mode='linear')
+def setGap(testFrom, testTo):
+    gapLinear = [round(99.2 / (80 - x), 10) for x in range(testFrom, testTo)]
+    gapMIHOYO = [8] * 80
+    return gapLinear, gapMIHOYO
 
-    X_values, Y_values, testFrom, testTo = SetXYPairMIHOYO(40, 76)
-    GetAnswer(X_values, Y_values, testFrom, testTo, mode='miHoYo')
+def runExcel(testFrom, testTo):
+    gapLinear, gapMIHOYO = setGap(testFrom, testTo)
+
+    linearEstimatedAvgProbabilityList = list()
+    miHoYoEstimatedAvgProbabilityList = list()
+    officalAvgProbabilityList = list()
+    for xValue in range(testFrom, testTo):
+        # linear
+        linearStar5Probability = [0.8] * xValue + [0.8 + gapLinear[xValue - testFrom] * (x + 1) for x in range(80 - xValue)]
+        linearStar5Probability[-1] = 100
+        linearNotStar5Probability = [100 - x for x in linearStar5Probability]
+        linearStar5WhenGotcha = [1] * 80
+        for i in range(1, 81):
+            for j in range(i - 1):
+                linearStar5WhenGotcha[i - 1] *= linearNotStar5Probability[j] / 100
+            linearStar5WhenGotcha[i - 1] *= linearStar5Probability[i - 1] / 100
+            linearStar5WhenGotcha[i - 1] *= 100
+        linearExpectationValue = [linearStar5WhenGotcha[i] * (i + 1) / 100 for i in range(0, 80)]
+        linearFinalExpectationValue = sum(linearExpectationValue)
+        linearEstimatedAvgProbability = 100 / linearFinalExpectationValue
+        linearEstimatedAvgProbabilityList.append(linearEstimatedAvgProbability)
+
+        # miHoYo
+        miHoYoStar5Probability = [0.8] * xValue + [0.8 + gapMIHOYO[x] * (x + 1) for x in range(80 - xValue)]
+        miHoYoStar5Probability[-1] = 100
+        miHoYoNotStar5Probability = [100 - x for x in miHoYoStar5Probability]
+        miHoYoStar5WhenGotcha = [1] * 80
+        for i in range(1, 81):
+            for j in range(i - 1):
+                miHoYoStar5WhenGotcha[i - 1] *= miHoYoNotStar5Probability[j] / 100
+            miHoYoStar5WhenGotcha[i - 1] *= miHoYoStar5Probability[i - 1] / 100
+            miHoYoStar5WhenGotcha[i - 1] *= 100
+        miHoYoExpectationValue = [miHoYoStar5WhenGotcha[i] * (i + 1) / 100 for i in range(0, 80)]
+        miHoYoFinalExpectationValue = sum(miHoYoExpectationValue)
+        miHoYoEstimatedAvgProbability = 100 / miHoYoFinalExpectationValue
+        miHoYoEstimatedAvgProbabilityList.append(miHoYoEstimatedAvgProbability)
+
+        officalAvgProbabilityList.append(1.8)
+
+        if xValue == 69:
+            plt.figure(figsize=(12, 6))
+            plt.bar(range(1, 81), linearStar5WhenGotcha, color='r', label='Linear')
+            plt.xlabel("X")
+            plt.ylabel("Estimated 5-star summon ratio (%)")
+            plt.title("Estimated 5-star summon ratio")
+            plt.legend()
+            plt.savefig(f"./Estimated 5-star summon ratio bar linear.png")
+            plt.close()
+
+            plt.figure(figsize=(12, 6))
+            plt.bar(range(1, 81), miHoYoStar5WhenGotcha, color='g', label='miHoYo')
+            plt.xlabel("X")
+            plt.ylabel("Estimated 5-star summon ratio (%)")
+            plt.title("Estimated 5-star summon ratio")
+            plt.legend()
+            plt.savefig(f"./Estimated 5-star summon ratio bar mihoyo.png")
+            plt.close()
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(range(testFrom, testTo), linearEstimatedAvgProbabilityList, color='r', marker='o', label='Linear')
+    plt.plot(range(testFrom, testTo), miHoYoEstimatedAvgProbabilityList, color='g', marker='o', label='miHoYo')
+    plt.plot(range(testFrom, testTo), officalAvgProbabilityList, color='b', marker='o', label='Offical')
+    plt.xlabel("X")
+    plt.ylabel("Estimated 5-star summon ratio (%)")
+    plt.title("Estimated 5-star summon ratio")
+    plt.legend()
+    plt.savefig(f"./Estimated 5-star summon ratio linear.png")
+    plt.close()
+        
+    for i in range(1, len(linearStar5WhenGotcha)):
+        linearStar5WhenGotcha[i] += linearStar5WhenGotcha[i - 1]
+        miHoYoStar5WhenGotcha[i] += miHoYoStar5WhenGotcha[i - 1]
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(range(1, 81), linearStar5WhenGotcha, color='r', label='Linear')
+    plt.plot(range(1, 81), miHoYoStar5WhenGotcha, color='g', label='miHoYo')
+    plt.xlabel("Gotcha")
+    plt.ylabel("5-star summon ratio (%)")
+    plt.title("5-star summon ratio")
+    plt.legend()
+    plt.savefig(f"./5-star summon ratio linear.png")
+    plt.close()
+
+    # for i in range(testFrom, testTo):
+    #     print(f"X = {i}, Linear: {linearEstimatedAvgProbabilityList[i - testFrom]}, miHoYo: {miHoYoEstimatedAvgProbabilityList[i - testFrom]}, Offical: {officalAvgProbabilityList[i - testFrom]}")
+
+if __name__ == "__main__":
+    # X_values, Y_values, testFrom, testTo = SetXYPairLinear(40, 76)
+    # GetAnswer(X_values, Y_values, testFrom, testTo, mode='linear')
+
+    # X_values, Y_values, testFrom, testTo = SetXYPairMIHOYO(40, 76)
+    # GetAnswer(X_values, Y_values, testFrom, testTo, mode='miHoYo')
+
+    runExcel(40, 76)
