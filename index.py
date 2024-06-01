@@ -13,6 +13,7 @@ def getFourStar(pity4Count, pity5Count, counter):
 def getFiveStar(pity4Count, pity5Count, counter):
     return 0, 0, counter + 1
 
+# incorrect estimate method
 def runOne(X, Y):
     # output list (the result of each summon for 1 run)
     output = list()
@@ -106,6 +107,7 @@ def drawBarChart(X_values, ratio, mode, index):
     plt.savefig(f"./{mode.lower()}/5-star ratio per summon {mode} X={X_values[index]}.png")
     plt.close()
 
+# incorrect estimate method
 def GetAnswer(X_values, Y_values, testFrom, testTo, mode):
     assert mode == "linear" or mode == "miHoYo", "mode should be either 'linear' or 'miHoYo'"
 
@@ -156,7 +158,7 @@ def setGap(testFrom, testTo):
     gapMIHOYO = [8] * 80
     return gapLinear, gapMIHOYO
 
-def runExcel(testFrom, testTo):
+def runCalculation(testFrom, testTo):
     gapLinear, gapMIHOYO = setGap(testFrom, testTo)
 
     linearEstimatedAvgProbabilityList = list()
@@ -249,4 +251,4 @@ if __name__ == "__main__":
     # X_values, Y_values, testFrom, testTo = SetXYPairMIHOYO(40, 76)
     # GetAnswer(X_values, Y_values, testFrom, testTo, mode='miHoYo')
 
-    runExcel(40, 76)
+    runCalculation(40, 76)
